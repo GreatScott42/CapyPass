@@ -1,0 +1,9 @@
+name: CapyPass
+version: '1.0-SNAPSHOT'
+main: me.GreatScott42.capyPass.CapyPass
+api-version: '1.21'
+commands:
+  battlepass:
+    description: battlepass information
+    usage: /battlepass
+    permission: Capypass.battlepass

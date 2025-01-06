@@ -1,0 +1,7 @@
+battlepass:
+  level 1:
+    reward: Diamond
+    amount: 4
+  level 2:
+    reward: Emerald
+    amount: 1
