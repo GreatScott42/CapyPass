@@ -7,3 +7,7 @@ commands:
     description: battlepass information
     usage: /battlepass
     permission: Capypass.battlepass
+  capypass:
+    description: Capypass admin commands
+    usage: /capypass <player> <premium-free> /capypass <player> <level>
+    permission: Capypass.battlepass

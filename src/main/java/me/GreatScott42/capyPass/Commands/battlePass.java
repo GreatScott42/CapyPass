@@ -1,11 +1,25 @@
 package me.GreatScott42.capyPass.Commands;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import me.GreatScott42.capyPass.CapyPass;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class battlePass implements CommandExecutor {
 
@@ -17,28 +31,131 @@ public class battlePass implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         Player player = (Player) sender;
         if(args.length==0){
-            for(String level : plugin.getBattlePass().getConfigurationSection("battlepass").getKeys(false)){
-                player.sendMessage(level+" reward:"+plugin.getBattlePass().get("battlepass."+level+".reward")+" amount:"+plugin.getBattlePass().get("battlepass."+level+".amount"));
+            //gui
+            Inventory gui = Bukkit.createInventory(player, plugin.getConfig().getInt("gui-size"), plugin.chatColor(plugin.getConfig().getString("gui-title")));
+            //Menu Options(Items)
+            //ItemStack players = new ItemStack(Material.PLAYER_HEAD);
+            ItemStack info = new ItemStack(Material.PLAYER_HEAD);
+            ItemMeta info_meta = info.getItemMeta();
+            info_meta.setDisplayName(player.getName()+" Info");
+            ArrayList<String> info_lore = new ArrayList<>();
+            info_lore.add(plugin.chatColor(plugin.getConfig().getString("level-word"))+plugin.getPlayersInfo().getInt("players."+player.getUniqueId()+".level"));
+            if(plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".free")){
+                info_lore.add(plugin.chatColor(plugin.getConfig().getString("current-status-free")));
+            }else if(!plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".free")){
+                info_lore.add(plugin.chatColor(plugin.getConfig().getString("current-status-premium")));
+            }
+            info_meta.setLore(info_lore);
+            SkullMeta skullMeta = (SkullMeta) info_meta;
+            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(player.getUniqueId()));
+            info.setItemMeta(info_meta);
+
+            List<ItemStack> levelsfree = new ArrayList<>();
+            for(int i = 0 ; i < plugin.getBattlePass().getConfigurationSection("battlepass.free").getKeys(false).size();i++){
+                ItemStack level = new ItemStack(Material.PLAYER_HEAD);
+                ItemMeta level_meta = level.getItemMeta();
+
+                ArrayList<String> level_lore = new ArrayList<>();
+                ///////////////////////!!!!!!!!!!!!!!!!!////////////////////
+                level_lore.add(plugin.chatColor(plugin.getConfig().getString("free-level-lore")));
+                ///////////////////////!!!!!!!!!!!!!!!!!////////////////////
+
+                //if reward claimed already
+                if(plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".claimed.free.level"+(i+1))){
+                    SkullMeta skullMeta1 = (SkullMeta) level_meta;
+                    skullMeta1.setPlayerProfile(plugin.claimedProfileList(i));
+                    level_lore.add(plugin.chatColor(plugin.getConfig().getString("reclaimed-word")));
+                }else if(!plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".claimed.free.level"+(i+1))){
+                    SkullMeta skullMeta1 = (SkullMeta) level_meta;
+                    skullMeta1.setPlayerProfile(plugin.profileList(i));
+                    level_lore.add(plugin.chatColor(plugin.getConfig().getString("unreclaimed-word")));
+                }
+                level_meta.setLore(level_lore);
+                level_meta.setDisplayName(plugin.getConfig().getString("level-word")+(i+1));
+                level.setItemMeta(level_meta);
+                levelsfree.add(level);
+            }
+            List<ItemStack> levelspremium = new ArrayList<>();
+            for(int i = 0 ; i < plugin.getBattlePass().getConfigurationSection("battlepass.premium").getKeys(false).size();i++){
+                ItemStack level = new ItemStack(Material.PLAYER_HEAD);
+                ItemMeta level_meta = level.getItemMeta();
+
+                ArrayList<String> level_lore = new ArrayList<>();
+                level_lore.add(plugin.chatColor(plugin.getConfig().getString("premium-level-lore")));
+
+
+                if(plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".claimed.premium.level"+(i+1))){
+                    SkullMeta skullMeta1 = (SkullMeta) level_meta;
+                    skullMeta1.setPlayerProfile(plugin.claimedProfileList(i));
+                    level_lore.add(plugin.chatColor(plugin.getConfig().getString("reclaimed-word")));
+                }else if(!plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".claimed.premium.level"+(i+1))){
+                    SkullMeta skullMeta1 = (SkullMeta) level_meta;
+                    skullMeta1.setPlayerProfile(plugin.profileList(i));
+                    level_lore.add(plugin.chatColor(plugin.getConfig().getString("unreclaimed-word")));
+                }
+                level_meta.setLore(level_lore);
+                level_meta.setDisplayName(plugin.chatColor(plugin.getConfig().getString("level-word")+(i+1)));
+                level.setItemMeta(level_meta);
+                levelspremium.add(level);
+            }
+            //ItemStack saved =  new ItemStack(Material.WRITABLE_BOOK);
+            String backgroundMat = plugin.getConfig().getString("gui-background");
+            ItemStack background = new ItemStack(Material.valueOf(backgroundMat));
+
+            /*ItemMeta players_meta = players.getItemMeta();
+            players_meta.setDisplayName(ChatColor.YELLOW + "Players");
+            ArrayList<String> players_lore = new ArrayList<>();
+            players_lore.add(ChatColor.YELLOW + "Teleport to other players");
+            players_meta.setLore(players_lore);
+            players.setItemMeta(players_meta);*/
+
+            /*ItemMeta saved_meta = saved.getItemMeta();
+            saved_meta.setDisplayName(ChatColor.YELLOW + "Saved Locations");
+            ArrayList<String> saved_lore = new ArrayList<>();
+            saved_lore.add(ChatColor.YELLOW + "Teleport to a saved location");
+            saved_meta.setLore(saved_lore);
+            saved.setItemMeta(saved_meta);*/
+
+            ItemMeta current_meta = background.getItemMeta();
+            current_meta.setDisplayName(plugin.chatColor(plugin.getConfig().getString("background-item-name")));
+            //ArrayList<String> current_lore = new ArrayList<>();
+            //current_lore.add(ChatColor.YELLOW + "Save this location");
+            //current_meta.setLore(current_lore);
+            background.setItemMeta(current_meta);
+
+            for(int i=0;i<gui.getSize();i++){
+                gui.setItem(i,background);
 
             }
+            for(int i=0;i<levelsfree.size();i++){
+                gui.setItem(i+plugin.getConfig().getInt("free-level-start"),levelsfree.get(i));
+            }
+            for(int i=0;i<levelspremium.size();i++){
+                gui.setItem(i+plugin.getConfig().getInt("premium-level-start"),levelspremium.get(i));
+            }
+            gui.setItem(9,info);
+
+            //gui.setItem(5,current);
+            player.openInventory(gui);
+            /*for(String level : plugin.getBattlePass().getConfigurationSection("battlepass").getKeys(false)){
+                player.sendMessage(level+" reward:"+plugin.getBattlePass().get("battlepass."+level+".reward")+" amount:"+plugin.getBattlePass().get("battlepass."+level+".amount"));
+
+            }*/
             return true;
         }
-        if(args[0]=="claim"){
-            if(args[1]=="1"){
-                if(checkPlayerLvl(player,1)){
-                    player.sendMessage("level 1 reward claimed");
+        /*if(args[0].equalsIgnoreCase("claim")){
+            if(args[1]!=null){
+                //player.sendMessage("your level: "+plugin.getPlayersInfo().get("players."+player.getUniqueId()+".level"));
+                if(checkPlayerLvl(player, Integer.parseInt(args[1]))){
+                    player.sendMessage("level "+args[1]+" reward claimed");
+                    executeCommands(args[1],player,true);
                 }else{
                     player.sendMessage("you have not the level");
                 }
             }
-        }
+        }*/
 
         return true;
     }
-    public boolean checkPlayerLvl(Player pl, int i){
-        if((int)plugin.getPlayersInfo().get(pl.getUniqueId()+".level")==i){
-            return true;
-        }
-        return false;
-    }
+
 }

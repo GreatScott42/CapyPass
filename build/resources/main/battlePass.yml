@@ -1,7 +1,33 @@
 battlepass:
-  level 1:
-    reward: Diamond
-    amount: 4
-  level 2:
-    reward: Emerald
-    amount: 1
+  free:
+    level1:
+      reward: Diamond
+      amount: 4
+      commands:
+        - "minecraft:give {player} minecraft:diamond 64"
+        - 'minecraft:tellraw {player} "ola"'
+    level2:
+      reward: Emerald
+      amount: 1
+      commands:
+        - "minecraft:give {player} minecraft:diamond 64"
+        - 'minecraft:tellraw {player} "free2"'
+  premium:
+    level1:
+      reward: Diamond
+      amount: 4
+      commands:
+        - "minecraft:give {player} minecraft:diamond 64"
+        - 'minecraft:tellraw {player} "premium1"'
+    level2:
+      reward: Emerald
+      amount: 1
+      commands:
+        - "minecraft:give {player} minecraft:diamond 64"
+        - 'minecraft:tellraw {player} "premium2"'
+    level3:
+      reward: Emerald
+      amount: 1
+      commands:
+        - "minecraft:give {player} minecraft:diamond 64"
+        - 'minecraft:tellraw {player} "premium3"'
