@@ -1,0 +1,43 @@
+#capypass config, hello
+
+#gui config
+#gui-backgound - if change needed check for blocks ids https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html#LIGHT_BLUE_STAINED_GLASS_PANE
+gui-background: GRAY_STAINED_GLASS_PANE
+#gui-size multiples of 9 please (9,18,27,54)
+gui-size: 27
+#where do free level start in the gui?(first row)
+free-level-start: 0
+#where do premiun level start in the gui?(third row)
+premium-level-start: 18
+#gui title
+gui-title: "Pase de batalla"
+
+#texts and messages config
+claimed-reward-message: "[CapyPass] ya has reclamado esta recompensa"
+no-levels-required: "[CapyPass] no tienes el nivel requerido"
+no-premium-pass: "[CapyPass] no tienes el pase premium"
+current-status-premium: "Estatus: Usuario Premium"
+current-status-free: "Estatus: Usuario Normal"
+premium-level-lore: "Pase Premium"
+free-level-lore: "Pase Gratis"
+level-word: "Nivel: "
+point-word: "Puntos: "
+reclaimed-word: "Reclamado"
+unreclaimed-word: "Sin reclamar"
+background-item-name: "BattlePass!"
+levelup-message: "Subiste de nivel"
+#commands
+changed-player-status-to-premium: "[CapyPass] se cambio a {player} a el pase premium"
+changed-player-status-to-free: "[CapyPass] se cambio a {player} a el pase gratis"
+#no placeholder level/point
+changed-player-level: "[CapyPass] se cambio el nivel de {player} a "
+changed-player-points: "[CapyPass] se cambiaron los puntos de {player} a "
+#NPC Marco's texts
+battlepass-gui-text: "Marco: Necesitas ayuda?"
+
+
+#mob types https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+
+#known errors: bad commands in battlepass commands, order in checks for level and status in command battlepass
+#maybe bugged disposition of levels and if are claimed or not
+#some bugs may be fixed deleting all config files and a restart/reload

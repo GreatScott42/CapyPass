@@ -1,0 +1,17 @@
+misions:
+  mision1:
+    objective: KILL_ENTITY
+    mob: COW
+    amount: 10
+    reward: 300
+    item: MILK_BUCKET
+    title: "MATA 10 VACAS"
+    finishers:
+  mision2:
+    objective: KILL_ENTITY
+    mob: PIG
+    amount: 5
+    reward: 100
+    item: PORKCHOP
+    title: "MATA 10 CHANCHOS"
+    finishers:

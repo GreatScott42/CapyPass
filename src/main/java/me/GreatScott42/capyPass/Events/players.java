@@ -1,16 +1,22 @@
 package me.GreatScott42.capyPass.Events;
 
 import me.GreatScott42.capyPass.CapyPass;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,11 +74,19 @@ public class players implements Listener {
 
     @EventHandler
     public void RegisterPlayer(PlayerJoinEvent e){
-        if(!plugin.getPlayersInfo().contains(String.valueOf(e.getPlayer().getUniqueId()))){
+
+        if(!plugin.getPlayersInfo().contains("players."+e.getPlayer().getUniqueId())){
+            Bukkit.getLogger().info("[CapyPass] player "+e.getPlayer().getName()+" not found, creating register.");
             plugin.getPlayersInfo().set("players."+e.getPlayer().getUniqueId()+".points", 0);
             plugin.getPlayersInfo().set("players."+e.getPlayer().getUniqueId()+".level", 0);
             plugin.getPlayersInfo().set("players."+e.getPlayer().getUniqueId()+".free", true);
             plugin.saveplayersInfo();
+
+            //
+            for(EntityType entity : EntityType.values()){
+                plugin.getStatistics().set("statistics."+".entities."+entity+"."+e.getPlayer().getUniqueId()+".kill",0);
+            }
+            plugin.savePlayersStatistics();
         }
         for(String k : plugin.getBattlePass().getConfigurationSection("battlepass.free").getKeys(false)){
             if(!plugin.getPlayersInfo().contains("players."+e.getPlayer().getUniqueId()+".claimed.free."+k)){
@@ -85,7 +99,38 @@ public class players implements Listener {
             }
         }
         plugin.saveplayersInfo();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                checkTimePlayed(e.getPlayer());
+            }
+            //(1sec=20ticks)20ticks*60sec=1m
+        }.runTaskTimer(this.plugin, 0,20*60);
+
+
     }
+    public void checkTimePlayed(Player player){
+        int timeSec = player.getStatistic(Statistic.PLAY_ONE_MINUTE)/20;
+        int timeMin = timeSec/60;
+        int timeHor = timeMin/60;
+        int timeDia = timeHor/25;
+        int p = plugin.getPlayersInfo().getInt("players."+player.getUniqueId()+".points");
+        int l = plugin.getPlayersInfo().getInt("players."+player.getUniqueId()+".level");
+        plugin.getPlayersInfo().set("players."+player.getUniqueId()+".points", p+1);
+        p++;
+        plugin.saveplayersInfo();
+        if(p>1000){
+            player.sendMessage("level up!");
+            plugin.getPlayersInfo().set("players."+player.getUniqueId()+".level", l+1);
+            plugin.getPlayersInfo().set("players."+player.getUniqueId()+".points", 0);
+        }
+        plugin.saveplayersInfo();
+        player.sendMessage("+1 point");
+        //player.sendMessage("FELICIDADES, HAS JUGADO "+timeSec+" SEGUNDOS, "+timeMin+" MINUTOS, "+timeHor+" HORAS Y "+timeDia+" DIAS");
+        //player.sendMessage("o tambien llevas: "+timeDia+"/"+timeHor%60+"/"+timeMin%60+"/"+timeSec%60);
+
+    }
+
     @EventHandler
     public void Menu(InventoryClickEvent e){
         success=false;
@@ -94,8 +139,9 @@ public class players implements Listener {
         if(e.getCurrentItem()==null){
             return;
         }
-        level = Character.getNumericValue(item.getItemMeta().getDisplayName().charAt(item.getItemMeta().getDisplayName().length()-1));
+
         if(e.getView().getTitle().equalsIgnoreCase(plugin.chatColor(plugin.getConfig().getString("gui-title")))){
+            level = Character.getNumericValue(item.getItemMeta().getDisplayName().charAt(item.getItemMeta().getDisplayName().length()-1));
             Player player = (Player) e.getWhoClicked();
 
             switch(e.getCurrentItem().getType()){
@@ -126,6 +172,24 @@ public class players implements Listener {
                         }
                     }
                     break;
+                case PIGLIN_HEAD:
+                    player.closeInventory();
+                    player.playSound(player,Sound.ENTITY_PIGLIN_AMBIENT,1,1);
+                    Inventory help = Bukkit.createInventory(player,9,"Marco te ayuda");
+
+                    ItemStack marco = new ItemStack(Material.PIGLIN_HEAD);
+                    ItemMeta help_meta = marco.getItemMeta();
+                    help_meta.setDisplayName("Marco: Que necesitas saber?");
+                    marco.setItemMeta(help_meta);
+
+                    help.setItem(0,marco);
+
+                    for(int i = 0; i<plugin.getHelpBooks().size();i++){
+                        help.setItem(i+1,plugin.getHelpBooks().get(i));
+                    }
+
+                    player.openInventory(help);
+                    break;
                 default:
                     break;
             }
@@ -141,6 +205,22 @@ public class players implements Listener {
                 item.setItemMeta(itemMeta);
 
                 e.getView().setItem(e.getSlot(), item);
+            }
+
+        }else if(e.getView().getTitle().equalsIgnoreCase("Marco te ayuda")){
+            Player player = (Player) e.getWhoClicked();
+
+            switch(e.getCurrentItem().getType()){
+                case PIGLIN_HEAD:
+                    player.playSound(player,Sound.ENTITY_PIGLIN_AMBIENT,1,1);
+                    e.setCancelled(true);
+                    break;
+                case BOOK:
+                    if(e.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("¿Como subo de nivel?")){
+                        player.sendMessage("<Marco> Para subir de nivel debes conseguir mil puntos");
+                    }
+                    e.setCancelled(true);
+                    break;
             }
 
         }

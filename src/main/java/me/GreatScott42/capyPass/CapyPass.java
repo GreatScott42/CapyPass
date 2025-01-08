@@ -5,12 +5,16 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import me.GreatScott42.capyPass.Commands.CapyPassCommand;
 import me.GreatScott42.capyPass.Commands.CapyPassTabCompleter;
 import me.GreatScott42.capyPass.Commands.battlePass;
+import me.GreatScott42.capyPass.Events.misions;
 import me.GreatScott42.capyPass.Events.players;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -26,26 +30,37 @@ public final class CapyPass extends JavaPlugin {
 
     private File playersInfoFile;
     private File battlePassFile;
+    private File misionsFile;
+    private File playersStatisticsFile;
     private FileConfiguration playersInfo;
     private FileConfiguration battlePass;
+    private FileConfiguration misionsInfo;
+    private FileConfiguration playersStatistics;
     private List<PlayerProfile> profiles = new ArrayList<>();
     private List<PlayerProfile> claimedProfiles = new ArrayList<>();
+    private List<ItemStack> helpBooks = new ArrayList<>();
 
     @Override
     public void onEnable() {
-        //
+        //creacion de libros de ayuda de marco
+        createHelpBooks();
+        //creaicon de Skins para cabezas
         createPlayerProfiles();
         createPlayerClaimedProfiles();
         //creacion configFile
         saveDefaultConfig();
-        //creacion de archivo de informacion de jugadores
+        //creacion de archivo de informacion de plugin
         createPlayerInfoFile();
         createBattlePassFile();
+        createMisionsFile();
+        createPlayerStatisticsFile();
         //registro de eventos
         getServer().getPluginManager().registerEvents(new players(this),this);
+        getServer().getPluginManager().registerEvents(new misions(this),this);
         //registro de comandos
         getCommand("battlepass").setExecutor(new battlePass(this));
         getCommand("capypass").setExecutor(new CapyPassCommand(this));
+        getCommand("misions").setExecutor(new misions(this));
         getCommand("capypass").setTabCompleter(new CapyPassTabCompleter());
         Bukkit.getLogger().info("[CapyPass] CapyPass is enabled");
         /*File config = new File(getDataFolder(),"playersinfo.yml");
@@ -63,6 +78,23 @@ public final class CapyPass extends JavaPlugin {
         Bukkit.getLogger().info("[CapyPass] CapyPass is disabled");
 
     }
+    public void createHelpBooks(){
+        //b1
+        ItemStack b1 = new ItemStack(Material.BOOK);
+        ItemMeta b1M = b1.getItemMeta();
+        b1M.setDisplayName("¿Como subo de nivel?");
+
+        ArrayList<String> b1_lore = new ArrayList<>();
+        b1_lore.add("Para subir de nivel debes conseguir mil puntos");
+        b1M.setLore(b1_lore);
+
+        b1.setItemMeta(b1M);
+        helpBooks.add(b1);
+
+    }
+    public List<ItemStack> getHelpBooks(){
+        return helpBooks;
+    }
 
     //metodos para informacion de jugadores
     public FileConfiguration getPlayersInfo() {
@@ -70,6 +102,12 @@ public final class CapyPass extends JavaPlugin {
     }
     public FileConfiguration getBattlePass() {
         return this.battlePass;
+    }
+    public FileConfiguration getMisions() {
+        return this.misionsInfo;
+    }
+    public FileConfiguration getStatistics() {
+        return this.playersStatistics;
     }
 
     public void saveplayersInfo(){
@@ -82,6 +120,20 @@ public final class CapyPass extends JavaPlugin {
     public void saveBattlePass(){
         try {
             battlePass.save(battlePassFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void saveMisions(){
+        try {
+            misionsInfo.save(misionsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void savePlayersStatistics(){
+        try {
+            playersStatistics.save(playersStatisticsFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -111,6 +163,36 @@ public final class CapyPass extends JavaPlugin {
         battlePass = new YamlConfiguration();
         try {
             battlePass.load(battlePassFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+    private void createMisionsFile() {
+        misionsFile = new File(getDataFolder(), "misions.yml");
+        if (!misionsFile.exists()) {
+            misionsFile.getParentFile().mkdirs();
+            saveResource("misions.yml", false);
+        }
+        misionsInfo = new YamlConfiguration();
+        try {
+            misionsInfo.load(misionsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+    private void createPlayerStatisticsFile() {
+        playersStatisticsFile = new File(getDataFolder(), "statistics.yml");
+        if (!playersStatisticsFile.exists()) {
+            playersStatisticsFile.getParentFile().mkdirs();
+            saveResource("statistics.yml", false);
+        }
+        playersStatistics = new YamlConfiguration();
+        try {
+            playersStatistics.load(playersStatisticsFile);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InvalidConfigurationException e) {

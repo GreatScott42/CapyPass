@@ -10,4 +10,8 @@ commands:
   capypass:
     description: Capypass admin commands
     usage: /capypass <player> <premium-free> /capypass <player> <level>
-    permission: Capypass.battlepass
+    permission: Capypass.capypass
+  misions:
+    description: misions information
+    usage: /misions
+    permission: CapyPass.misions
