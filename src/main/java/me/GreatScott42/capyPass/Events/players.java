@@ -75,6 +75,8 @@ public class players implements Listener {
     @EventHandler
     public void RegisterPlayer(PlayerJoinEvent e){
 
+        plugin.getDatabase().insertPlayer(String.valueOf(e.getPlayer().getUniqueId()));
+
         if(!plugin.getPlayersInfo().contains("players."+e.getPlayer().getUniqueId())){
             Bukkit.getLogger().info("[CapyPass] player "+e.getPlayer().getName()+" not found, creating register.");
             plugin.getPlayersInfo().set("players."+e.getPlayer().getUniqueId()+".points", 0);

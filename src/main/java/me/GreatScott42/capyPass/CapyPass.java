@@ -4,7 +4,8 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import me.GreatScott42.capyPass.Commands.CapyPassCommand;
 import me.GreatScott42.capyPass.Commands.CapyPassTabCompleter;
-import me.GreatScott42.capyPass.Commands.battlePass;
+import me.GreatScott42.capyPass.Commands.BattlePass;
+import me.GreatScott42.capyPass.Database.DatabaseManager;
 import me.GreatScott42.capyPass.Events.misions;
 import me.GreatScott42.capyPass.Events.players;
 import org.bukkit.Bukkit;
@@ -19,9 +20,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +37,8 @@ public final class CapyPass extends JavaPlugin {
     private List<PlayerProfile> profiles = new ArrayList<>();
     private List<PlayerProfile> claimedProfiles = new ArrayList<>();
     private List<ItemStack> helpBooks = new ArrayList<>();
+
+    private DatabaseManager database;
 
     @Override
     public void onEnable() {
@@ -58,10 +58,15 @@ public final class CapyPass extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new players(this),this);
         getServer().getPluginManager().registerEvents(new misions(this),this);
         //registro de comandos
-        getCommand("battlepass").setExecutor(new battlePass(this));
+        getCommand("battlepass").setExecutor(new BattlePass(this));
         getCommand("capypass").setExecutor(new CapyPassCommand(this));
         getCommand("misions").setExecutor(new misions(this));
         getCommand("capypass").setTabCompleter(new CapyPassTabCompleter());
+
+        database = new DatabaseManager(this);
+        database.connect();
+        database.createTable();
+
         Bukkit.getLogger().info("[CapyPass] CapyPass is enabled");
         /*File config = new File(getDataFolder(),"playersinfo.yml");
         File configBackup = new File(getDataFolder(),"playersinfoBU.yml");
@@ -75,8 +80,15 @@ public final class CapyPass extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+        database.disconnect();
+
         Bukkit.getLogger().info("[CapyPass] CapyPass is disabled");
 
+    }
+
+    public DatabaseManager getDatabase() {
+        return database;
     }
     public void createHelpBooks(){
         //b1
@@ -159,6 +171,30 @@ public final class CapyPass extends JavaPlugin {
         if (!battlePassFile.exists()) {
             battlePassFile.getParentFile().mkdirs();
             saveResource("battlePass.yml", false);
+            //create blank levels of the pass
+            //free pass
+            battlePass = new YamlConfiguration();
+            try {
+                battlePass.load(battlePassFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InvalidConfigurationException e) {
+                e.printStackTrace();
+            }
+            for(int i=0;i<150;i++){
+                if(i<100){
+                    battlePass.set("battlepass.free.level"+(i+1)+".reward","Diamond");
+                    battlePass.set("battlepass.free.level"+(i+1)+".amount",1);
+                }
+                battlePass.set("battlepass.premium.level"+(i+1)+".reward","Emerald");
+                battlePass.set("battlepass.premium.level"+(i+1)+".amount",1);
+            }
+            try {
+                battlePass.save(battlePassFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
         }
         battlePass = new YamlConfiguration();
         try {

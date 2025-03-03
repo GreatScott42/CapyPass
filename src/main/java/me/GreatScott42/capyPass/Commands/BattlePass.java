@@ -1,15 +1,12 @@
 package me.GreatScott42.capyPass.Commands;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
 import me.GreatScott42.capyPass.CapyPass;
+import me.GreatScott42.capyPass.Database.DatabaseManager;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -21,36 +18,51 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class battlePass implements CommandExecutor {
+public class BattlePass implements CommandExecutor {
 
     private CapyPass plugin;
-    public battlePass(CapyPass plugin){
+    private DatabaseManager db;
+    //definitions
+    private String pointWord;
+    private String levelWord;
+    public BattlePass(CapyPass plugin){
         this.plugin=plugin;
+        this.pointWord = plugin.chatColor(plugin.getConfig().getString("point-word"));
+        this.levelWord = plugin.chatColor(plugin.getConfig().getString("level-word"));
+        this.db = plugin.getDatabase();
     }
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if(!(sender instanceof Player)){
+            return false;
+        }
         Player player = (Player) sender;
+        String playerUUID = String.valueOf(player.getUniqueId());
+        boolean isfree = ((Integer) db.getPlayerAttribute(playerUUID,"free"))==1;
         if(args.length==0){
-            //gui
+            //gui menu//
             Inventory gui = Bukkit.createInventory(player, plugin.getConfig().getInt("gui-size"), plugin.chatColor(plugin.getConfig().getString("gui-title")));
             //Menu Options(Items)
+
+            //player info start
             ItemStack info = new ItemStack(Material.PLAYER_HEAD);
             ItemMeta info_meta = info.getItemMeta();
             info_meta.setDisplayName(player.getName()+" Info");
             ArrayList<String> info_lore = new ArrayList<>();
-            info_lore.add(plugin.chatColor(plugin.getConfig().getString("point-word"))+plugin.getPlayersInfo().getInt("players."+player.getUniqueId()+".points"));
-            info_lore.add(plugin.chatColor(plugin.getConfig().getString("level-word"))+plugin.getPlayersInfo().getInt("players."+player.getUniqueId()+".level"));
-
-            if(plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".free")){
+            //points and level of player
+            info_lore.add(pointWord+db.getPlayerAttribute(playerUUID,"points"));
+            info_lore.add(levelWord+db.getPlayerAttribute(playerUUID,"level"));
+            //
+            if(isfree){
                 info_lore.add(plugin.chatColor(plugin.getConfig().getString("current-status-free")));
-            }else if(!plugin.getPlayersInfo().getBoolean("players."+player.getUniqueId()+".free")){
+            }else if(!isfree){
                 info_lore.add(plugin.chatColor(plugin.getConfig().getString("current-status-premium")));
             }
-
             info_meta.setLore(info_lore);
             SkullMeta skullMeta = (SkullMeta) info_meta;
             skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(player.getUniqueId()));
             info.setItemMeta(info_meta);
+            //player info end
             //help head
             ItemStack help = new ItemStack(Material.PIGLIN_HEAD);
             ItemMeta help_meta = help.getItemMeta();

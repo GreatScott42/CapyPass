@@ -25,12 +25,16 @@ point-word: "Puntos: "
 reclaimed-word: "Reclamado"
 unreclaimed-word: "Sin reclamar"
 background-item-name: "BattlePass!"
+levelup-message: "Subiste de nivel"
 #commands
 changed-player-status-to-premium: "[CapyPass] se cambio a {player} a el pase premium"
 changed-player-status-to-free: "[CapyPass] se cambio a {player} a el pase gratis"
 #no placeholder level/point
 changed-player-level: "[CapyPass] se cambio el nivel de {player} a "
 changed-player-points: "[CapyPass] se cambiaron los puntos de {player} a "
+#NPC Marco's texts
+battlepass-gui-text: "Marco: Necesitas ayuda?"
+
 
 #mob types https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 

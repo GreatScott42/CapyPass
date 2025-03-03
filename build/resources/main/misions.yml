@@ -6,6 +6,7 @@ misions:
     reward: 300
     item: MILK_BUCKET
     title: "MATA 10 VACAS"
+    finish-message: "[Capypass] mision {title} completada"
     finishers:
   mision2:
     objective: KILL_ENTITY
@@ -13,5 +14,6 @@ misions:
     amount: 5
     reward: 100
     item: PORKCHOP
-    title: "MATA 10 CHANCHOS"
+    title: "MATA 5 CHANCHOS"
+    finish-message: "[Capypass] mision {title} completada"
     finishers:
